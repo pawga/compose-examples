@@ -1,0 +1,37 @@
+version: '3.5'
+
+networks:
+  ldap-network:
+    driver: bridge
+services:
+  openldap:
+    image: osixia/openldap:1.4.0
+    ports:
+      - '389:389'
+      - '636:636'
+    environment:
+      LDAP_LOG_LEVEL: "256"
+      LDAP_ORGANISATION: "Pawga Inc."
+      LDAP_DOMAIN: "pawga.ru"
+      LDAP_BASE_DN: "DC=pawga,DC=ru"
+      LDAP_ADMIN_PASSWORD: "ZSE4zse4"
+      LDAP_CONFIG_PASSWORD: "config"
+    networks:
+      - ldap-network
+    volumes:
+      - /home/sivannikov/docker/volumes/openldap/ldap:/var/lib/ldap
+      - /home/sivannikov/docker/volumes/openldap/slapd.d:/etc/ldap/slapd.d
+    restart: unless-stopped
+  ldap_server_admin:
+      image: osixia/phpldapadmin:0.9.0
+      ports:
+        - 8090:80
+      environment:
+        PHPLDAPADMIN_LDAP_HOSTS: openldap
+        PHPLDAPADMIN_HTTPS: 'false'
+      networks:
+        - ldap-network
+      restart: unless-stopped
+volumes:
+    ldap:
+    slapd.d:

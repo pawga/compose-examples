@@ -1,0 +1,60 @@
+version: '3.5'
+
+services:
+  postgres:
+    container_name: postgres_container
+    image: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-camunda}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ZSE4zse4}
+      PGDATA: /data/postgres
+    volumes:
+       - /home/sivannikov/docker/volumes/postgres:/data/postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - postgres
+    restart: unless-stopped
+
+  camunda:
+    image: pawga777/camunda-spring-boot-starter:005
+    container_name: camunda_bpm
+    ports:
+      - "8443:8443"
+    depends_on:
+      - postgres
+    environment:
+      - DB_DRIVER=org.postgresql.Driver
+      - DB_URL=jdbc:postgresql://postgres:5432/process-engine
+      - DB_USERNAME=camunda
+      - DB_PASSWORD=ZSE4zse4
+    volumes:
+      - /home/sivannikov/pawga/logs/:/app/logs/
+      - /home/sivannikov/pawga/config/:/app/config
+    networks:
+      - postgres
+    restart: unless-stopped
+
+  pgadmin:
+    container_name: pgadmin_container
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-ivannikov.s@gmail.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-ZSE4zse4}
+    volumes:
+       - pgadmin:/root/.pgadmin
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    networks:
+      - postgres
+    restart: unless-stopped
+
+networks:
+  postgres:
+    driver: bridge
+
+volumes:
+    postgres:
+    pgadmin:
+
+
